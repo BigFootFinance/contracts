@@ -1,14 +1,14 @@
 # contracts
 
-FOOT Token : 
+BFOOT Token : 
 
-Address : 0x2c154926B8a6bDE338BD8B9CE281e6D32Ba64193
+Address : 0x9c165605A2C3DF26513a16045Cdb689AeAE69299
 
-BSC contract code : https://bscscan.com/address/0x2c154926B8a6bDE338BD8B9CE281e6D32Ba64193#code
+BSC contract code : https://bscscan.com/address/0x9c165605A2C3DF26513a16045Cdb689AeAE69299#code
 
-FOOT Masterchef : 
+BFOOT Masterchef : 
 
-Address : 0xd5844A33A20AC07e465716d6E493d813a128DaF9
+Address : 0xFEC07922353b1bE3B54D30ba33cbF1b3542b2ED3
 
-BSC contract code : https://bscscan.com/address/0xd5844A33A20AC07e465716d6E493d813a128DaF9#code
+BSC contract code : https://bscscan.com/address/0xFEC07922353b1bE3B54D30ba33cbF1b3542b2ED3#code
 

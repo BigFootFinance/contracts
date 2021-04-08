@@ -20,16 +20,16 @@ contract TheBush is Ownable {
     // Info of each pool.
     struct PoolInfo {
         IBEP20 lpToken;           // Address of LP token contract.
-        uint256 allocPoint;       // How many allocation points assigned to this pool. FOOTs to distribute per block.
-        uint256 lastRewardBlock;  // Last block number that FOOTs distribution occurs.
-        uint256 accFootPerShare; // Accumulated FOOTs per share, times 1e12. See below.
+        uint256 allocPoint;       // How many allocation points assigned to this pool. BFOOTs to distribute per block.
+        uint256 lastRewardBlock;  // Last block number that BFOOTs distribution occurs.
+        uint256 accBFootPerShare; // Accumulated BFOOTs per share, times 1e12. See below.
     }
 
-    // The FOOT TOKEN!
-    IBEP20 public foot;
+    // The BFOOT TOKEN!
+    IBEP20 public bfoot;
     IBEP20 public rewardToken;
 
-    // FOOT tokens created per block.
+    // BFOOT tokens created per block.
     uint256 public rewardPerBlock;
 
     // Info of each pool.
@@ -38,9 +38,9 @@ contract TheBush is Ownable {
     mapping (address => UserInfo) public userInfo;
     // Total allocation poitns. Must be the sum of all allocation points in all pools.
     uint256 private totalAllocPoint = 0;
-    // The block number when FOOT mining starts.
+    // The block number when BFOOT mining starts.
     uint256 public startBlock;
-    // The block number when FOOT mining ends.
+    // The block number when BFOOT mining ends.
     uint256 public bonusEndBlock;
 
     event Deposit(address indexed user, uint256 amount);
@@ -48,13 +48,13 @@ contract TheBush is Ownable {
     event EmergencyWithdraw(address indexed user, uint256 amount);
 
     constructor(
-        IBEP20 _foot,
+        IBEP20 _bfoot,
         IBEP20 _rewardToken,
         uint256 _rewardPerBlock,
         uint256 _startBlock,
         uint256 _bonusEndBlock
     ) public {
-        foot = _foot;
+        bfoot = _bfoot;
         rewardToken = _rewardToken;
         rewardPerBlock = _rewardPerBlock;
         startBlock = _startBlock;
@@ -62,10 +62,10 @@ contract TheBush is Ownable {
 
         // staking pool
         poolInfo.push(PoolInfo({
-            lpToken: _foot,
+            lpToken: _bfoot,
             allocPoint: 1000,
             lastRewardBlock: startBlock,
-            accFootPerShare: 0
+            accBFootPerShare: 0
         }));
 
         totalAllocPoint = 1000;
@@ -92,14 +92,14 @@ contract TheBush is Ownable {
     function pendingReward(address _user) external view returns (uint256) {
         PoolInfo storage pool = poolInfo[0];
         UserInfo storage user = userInfo[_user];
-        uint256 accFootPerShare = pool.accFootPerShare;
+        uint256 accBFootPerShare = pool.accBFootPerShare;
         uint256 lpSupply = pool.lpToken.balanceOf(address(this));
         if (block.number > pool.lastRewardBlock && lpSupply != 0) {
             uint256 multiplier = getMultiplier(pool.lastRewardBlock, block.number);
-            uint256 footReward = multiplier.mul(rewardPerBlock).mul(pool.allocPoint).div(totalAllocPoint);
-            accFootPerShare = accFootPerShare.add(footReward.mul(1e12).div(lpSupply));
+            uint256 bfootReward = multiplier.mul(rewardPerBlock).mul(pool.allocPoint).div(totalAllocPoint);
+            accBFootPerShare = accBFootPerShare.add(bfootReward.mul(1e12).div(lpSupply));
         }
-        return user.amount.mul(accFootPerShare).div(1e12).sub(user.rewardDebt);
+        return user.amount.mul(accBFootPerShare).div(1e12).sub(user.rewardDebt);
     }
 
     // Update reward variables of the given pool to be up-to-date.
@@ -114,8 +114,8 @@ contract TheBush is Ownable {
             return;
         }
         uint256 multiplier = getMultiplier(pool.lastRewardBlock, block.number);
-        uint256 footReward = multiplier.mul(rewardPerBlock).mul(pool.allocPoint).div(totalAllocPoint);
-        pool.accFootPerShare = pool.accFootPerShare.add(footReward.mul(1e12).div(lpSupply));
+        uint256 bfootReward = multiplier.mul(rewardPerBlock).mul(pool.allocPoint).div(totalAllocPoint);
+        pool.accBFootPerShare = pool.accBFootPerShare.add(bfootReward.mul(1e12).div(lpSupply));
         pool.lastRewardBlock = block.number;
     }
 
@@ -128,14 +128,14 @@ contract TheBush is Ownable {
     }
 
 
-    // Stake FOOT tokens to SmartChef
+    // Stake BFOOT tokens to SmartChef
     function deposit(uint256 _amount) public {
         PoolInfo storage pool = poolInfo[0];
         UserInfo storage user = userInfo[msg.sender];
 
         updatePool(0);
         if (user.amount > 0) {
-            uint256 pending = user.amount.mul(pool.accFootPerShare).div(1e12).sub(user.rewardDebt);
+            uint256 pending = user.amount.mul(pool.accBFootPerShare).div(1e12).sub(user.rewardDebt);
             if(pending > 0) {
                 rewardToken.safeTransfer(address(msg.sender), pending);
             }
@@ -144,18 +144,18 @@ contract TheBush is Ownable {
             pool.lpToken.safeTransferFrom(address(msg.sender), address(this), _amount);
             user.amount = user.amount.add(_amount);
         }
-        user.rewardDebt = user.amount.mul(pool.accFootPerShare).div(1e12);
+        user.rewardDebt = user.amount.mul(pool.accBFootPerShare).div(1e12);
 
         emit Deposit(msg.sender, _amount);
     }
 
-    // Withdraw FOOT tokens from STAKING.
+    // Withdraw BFOOT tokens from STAKING.
     function withdraw(uint256 _amount) public {
         PoolInfo storage pool = poolInfo[0];
         UserInfo storage user = userInfo[msg.sender];
         require(user.amount >= _amount, "withdraw: not good");
         updatePool(0);
-        uint256 pending = user.amount.mul(pool.accFootPerShare).div(1e12).sub(user.rewardDebt);
+        uint256 pending = user.amount.mul(pool.accBFootPerShare).div(1e12).sub(user.rewardDebt);
         if(pending > 0) {
             rewardToken.safeTransfer(address(msg.sender), pending);
         }
@@ -163,7 +163,7 @@ contract TheBush is Ownable {
             user.amount = user.amount.sub(_amount);
             pool.lpToken.safeTransfer(address(msg.sender), _amount);
         }
-        user.rewardDebt = user.amount.mul(pool.accFootPerShare).div(1e12);
+        user.rewardDebt = user.amount.mul(pool.accBFootPerShare).div(1e12);
 
         emit Withdraw(msg.sender, _amount);
     }
